@@ -1,15 +1,20 @@
 package com.redue.newsflow.entities;
 
 import com.redue.newsflow.enums.Roles;
-import lombok.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
 @Document(collection = "users")
 public class User {
 
@@ -18,9 +23,15 @@ public class User {
 
     private String username;
     private String name;
+
+    @Email
     private String email;
+
+    @Size(max = 120)
     private String password;
+
     private String country;
+
     private Roles roles;
 
 }

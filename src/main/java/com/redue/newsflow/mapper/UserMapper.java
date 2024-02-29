@@ -5,16 +5,18 @@ import com.redue.newsflow.entities.User;
 import com.redue.newsflow.dto.user.UserDto;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
     UserDto toDTO(User entity);
 
-    @InheritInverseConfiguration
     User toEntity(UserDto dto);
 
-    User toInsertDto(SignUpDto dto);
+    SignUpDto toInsertDto(User dto);
 
-    SignUpDto toEntityInsert(User dto);
+    @Mapping(target = "username", source = "username")
+    User toEntityInsert(SignUpDto dto);
 }

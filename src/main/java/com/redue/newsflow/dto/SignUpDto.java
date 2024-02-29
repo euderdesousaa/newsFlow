@@ -1,8 +1,12 @@
 package com.redue.newsflow.dto;
 
-public record SignUpDto(String username,
-                        String name,
-                        String email,
-                        String password,
-                        String country) {
+import lombok.*;
+
+@Data
+public class SignUpDto {
+    private String username;
+    private String name;
+    private String email;
+    private String password;
+    private String country;
 }
