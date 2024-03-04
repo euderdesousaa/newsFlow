@@ -23,7 +23,7 @@ public class AuthService {
     public SignUpDto registerUser(SignUpDto dto) {
         User user = mapper.toEntityInsert(dto);
         user.setRoles(Roles.USER);
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        user.setPassword(passwordEncoder.encode(dto.password()));
         return mapper.toInsertDto(repository.save(user));
     }
 }
