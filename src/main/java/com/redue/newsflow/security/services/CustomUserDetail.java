@@ -11,7 +11,7 @@ import java.util.List;
 
 public class CustomUserDetail implements UserDetails {
 
-    private User user;
+    private final transient User user;
 
     private Roles role;
 
