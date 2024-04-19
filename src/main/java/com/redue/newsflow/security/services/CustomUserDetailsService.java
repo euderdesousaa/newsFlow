@@ -1,4 +1,4 @@
-package com.redue.newsflow.service;
+package com.redue.newsflow.security.services;
 
 import com.redue.newsflow.entities.User;
 import com.redue.newsflow.repositories.UserRepository;

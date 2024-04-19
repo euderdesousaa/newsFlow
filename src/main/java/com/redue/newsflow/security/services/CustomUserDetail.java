@@ -1,4 +1,4 @@
-package com.redue.newsflow.service;
+package com.redue.newsflow.security.services;
 
 import com.redue.newsflow.entities.User;
 import com.redue.newsflow.enums.Roles;
@@ -11,7 +11,7 @@ import java.util.List;
 
 public class CustomUserDetail implements UserDetails {
 
-    private User user;
+    private final transient User user;
 
     private Roles role;
 
