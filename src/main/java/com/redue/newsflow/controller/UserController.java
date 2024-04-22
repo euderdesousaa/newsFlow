@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("/api/v1/")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -18,7 +18,7 @@ public class UserController {
         return "Hello World";
     }
 
-    @PutMapping("/{username}")
+    @PutMapping("/modify/{username}")
     public ResponseEntity<UserUpdateDTO> updateDto(@PathVariable String username,
                                                    @RequestBody UserUpdateDTO dto){
         service.updateUser(username, dto);
