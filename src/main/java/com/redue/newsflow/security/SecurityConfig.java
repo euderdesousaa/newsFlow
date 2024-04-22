@@ -61,7 +61,7 @@ public class SecurityConfig {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(req ->{
-                        req.requestMatchers(AntPathRequestMatcher.antMatcher("/api/auth/**")).permitAll();
+                        req.requestMatchers(AntPathRequestMatcher.antMatcher("/api/v1/auth/**")).permitAll();
                 req.anyRequest().authenticated();
                 })
                 .addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class )
