@@ -30,8 +30,6 @@ public class User {
     @Size(max = 120)
     private String password;
 
-    private String country;
-
     private Roles roles;
 
 }
