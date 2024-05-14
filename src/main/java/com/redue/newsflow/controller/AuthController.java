@@ -1,10 +1,12 @@
 package com.redue.newsflow.controller;
 
+import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.redue.newsflow.dto.LoginDto;
 import com.redue.newsflow.dto.LoginResponseDTO;
 import com.redue.newsflow.dto.SignUpDto;
 import com.redue.newsflow.security.jwt.JwtUtils;
 import com.redue.newsflow.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -36,7 +40,8 @@ public class AuthController {
     private int jwtExpirationMs;
 
     @PostMapping("/signup")
-    public ResponseEntity<SignUpDto> registerUser(@Valid @RequestBody SignUpDto dto) {
+    public ResponseEntity<SignUpDto> registerUser(@Valid @RequestBody SignUpDto dto,
+                                                  HttpServletRequest request) throws IOException, GeoIp2Exception {
         SignUpDto sign = service.registerUser(dto);
         return ResponseEntity.ok(sign);
     }
@@ -57,6 +62,14 @@ public class AuthController {
         return LoginResponseDTO.builder().
                 jwt(jwt).
                 build();
+    }
+
+    private String getClientIP(HttpServletRequest request) {
+        final String xfHeader = request.getHeader("X-Forwarded-For");
+        if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {
+            return request.getRemoteAddr();
+        }
+        return xfHeader.split(",")[0];
     }
 }
 
