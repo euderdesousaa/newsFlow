@@ -2,8 +2,14 @@ package com.redue.newsflow.service;
 
 import com.redue.newsflow.api.TheNewsApiTopData;
 import com.redue.newsflow.api.responses.TheNewsApiData;
+import com.redue.newsflow.repositories.UserLocationRepository;
+import com.redue.newsflow.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -11,10 +17,14 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 public class TheNewsApiService {
 
+    private static final Logger log = LoggerFactory.getLogger(TheNewsApiService.class);
     @Value("${thenewsapi.token}")
     private String token;
 
     private final RestTemplate restTemplate;
+
+    private final UserRepository repositoryU;
+    private final UserLocationRepository repositoryL;
 
     public TheNewsApiData findAllNews(int page) {
         String finalApi = buildAPI("all", page);
@@ -45,4 +55,11 @@ public class TheNewsApiService {
         return url.replace("API_ENDPOINT", endpoint).replace("API_TOKEN", token)
                 .concat("&page=").concat(String.valueOf(page));
     }
+
+    public Authentication filterByIsoCode(String isoCode) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        repositoryL.findUserByIsoCode(isoCode);
+        return authentication;
+    }
+
 }

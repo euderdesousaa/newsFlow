@@ -4,6 +4,7 @@ import com.redue.newsflow.api.TheNewsApiTopData;
 import com.redue.newsflow.api.responses.TheNewsApiData;
 import com.redue.newsflow.service.TheNewsApiService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 public class TheNewsApiController {
 
     private final TheNewsApiService service;
+
 
     @GetMapping
     public TheNewsApiData getTheNews(@RequestParam(defaultValue = "1") int page) {
@@ -24,7 +26,7 @@ public class TheNewsApiController {
         return service.findByCategories(categories, page);
     }
 
-    @GetMapping("/topnews")
+    @GetMapping("/top-news")
     public TheNewsApiTopData getTopNews(@RequestParam(defaultValue = "1") int page,
                                         @RequestParam(defaultValue = "en") String language,
                                         @RequestParam(defaultValue = "us") String locale) {
@@ -34,5 +36,10 @@ public class TheNewsApiController {
     public TheNewsApiData getNewsBySearch(@RequestParam(defaultValue = "1") int page,
                                           @RequestParam String search) {
         return service.findBySearch(search, page);
+    }
+
+    @GetMapping("teste")
+    public Authentication teste(String isoCode) {
+        return service.filterByIsoCode(isoCode);
     }
 }
