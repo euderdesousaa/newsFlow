@@ -47,7 +47,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponseDTO authenticateUser(@RequestBody LoginDto loginDto, HttpServletResponse response) {
+    public LoginResponseDTO authenticateUser(@RequestBody LoginDto loginDto, HttpServletResponse response,
+                                             HttpServletRequest request) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginDto.username(), loginDto.password()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -59,18 +60,59 @@ public class AuthController {
                 .maxAge(jwtExpirationMs)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        getClientIPv4(request);
         return LoginResponseDTO.builder().
                 jwt(jwt).
+                ipAddress(getClientIPv4(request)).
                 build();
     }
 
-    private String getClientIP(HttpServletRequest request) {
+    private String getClientIPv4(HttpServletRequest request) {
         final String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader == null || xfHeader.isEmpty() || !xfHeader.contains(request.getRemoteAddr())) {
-            return request.getRemoteAddr();
+
+        if (xfHeader != null && !xfHeader.isEmpty()) {
+            // Processa a lista de IPs no cabeçalho X-Forwarded-For
+            String[] ipAddresses = xfHeader.split(",");
+            for (String ip : ipAddresses) {
+                ip = ip.trim();
+                if (isValidIPv4(ip) && !isPrivateOrLoopback(ip)) {
+                    return ip;
+                }
+            }
         }
-        return xfHeader.split(",")[0];
+
+        // Fallback para request.getRemoteAddr()
+        String remoteIp = request.getRemoteAddr();
+
+        if (isValidIPv4(remoteIp) && !isPrivateOrLoopback(remoteIp)) {
+            return remoteIp;
+        }
+
+        // Caso nenhum IP válido seja encontrado
+        return "IP não disponível";
     }
+
+    // Valida se é um endereço IPv4 válido
+    private boolean isValidIPv4(String ip) {
+        String ipv4Pattern = "^((25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[0-1]?[0-9][0-9]?)$";
+        return ip.matches(ipv4Pattern);
+    }
+
+    // Verifica se o IP é loopback ou privado
+    private boolean isPrivateOrLoopback(String ip) {
+        return ip.startsWith("10.") ||                // Faixa privada
+                ip.startsWith("192.168.") ||          // Faixa privada
+                (ip.startsWith("172.") && is172Private(ip)) || // Faixa privada 172.16.x.x a 172.31.x.x
+                ip.equals("127.0.0.1");               // Loopback
+    }
+
+    // Verifica se um IP na faixa 172.x.x.x é privado
+    private boolean is172Private(String ip) {
+        String[] parts = ip.split("\\.");
+        int secondOctet = Integer.parseInt(parts[1]);
+        return secondOctet >= 16 && secondOctet <= 31;
+    }
+
 }
 
 
