@@ -1,8 +1,9 @@
-version: "3.8"
 services:
   mongodb:
     image: mongo
     restart: always
+    networks:
+      - news_api-network
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoadmin
       - MONGO_INITDB_ROOT_PASSWORD=pass
@@ -11,3 +12,6 @@ services:
       - ./init-mongodb/data:/tmp/data
     ports:
       - "27017:27017"
+networks:
+  news_api-network:
+    driver: bridge

@@ -5,7 +5,12 @@ import com.redue.newsflow.dto.LoginResponseDTO;
 import com.redue.newsflow.dto.SignUpDto;
 import com.redue.newsflow.security.jwt.JwtUtils;
 import com.redue.newsflow.service.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -27,19 +32,32 @@ public class AuthController {
 
     private final JwtUtils jwtUtils;
 
+    @Value("${redue.app.jwtExpirationMs}")
+    private int jwtExpirationMs;
+
     @PostMapping("/signup")
-    public ResponseEntity<SignUpDto> registerUser(@RequestBody SignUpDto dto) {
+    public ResponseEntity<SignUpDto> registerUser(@Valid @RequestBody SignUpDto dto) {
         SignUpDto sign = service.registerUser(dto);
         return ResponseEntity.ok(sign);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginDto loginDto) {
+    public LoginResponseDTO authenticateUser(@RequestBody LoginDto loginDto, HttpServletResponse response) {
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginDto.username(), loginDto.password()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
-        return ResponseEntity.ok(new LoginResponseDTO(jwt));
+        ResponseCookie cookie = ResponseCookie.from("accessToken", jwt)
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(jwtExpirationMs)
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return LoginResponseDTO.builder().
+                jwt(jwt).
+                build();
     }
 }
+
 
