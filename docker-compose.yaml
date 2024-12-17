@@ -7,6 +7,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=mongoadmin
       - MONGO_INITDB_ROOT_PASSWORD=pass
+      - MONGO_INITDB_DATABASE=newsflow
     volumes:
       - ./init-mongodb:/docker-entrypoint-initdb.d
       - ./init-mongodb/data:/tmp/data
