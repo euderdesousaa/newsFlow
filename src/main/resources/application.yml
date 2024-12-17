@@ -4,6 +4,6 @@ server:
 spring:
   data:
     mongodb:
-      username: mongoadmin
-      password: pass
-      host: localhost
+      username: ${MONGODB_USERNAME}
+      password: ${MONGODB_PASSWORD}
+      host: ${MONGODB_HOST}
