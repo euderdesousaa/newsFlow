@@ -1,9 +1,20 @@
-FROM maven:3.8.6-amazoncorretto-17 AS build
+# Etapa de build
+FROM maven:3.8.6-amazoncorretto-17 as build
 WORKDIR /app
-COPY . .
-RUN mvn clean package -X -DskipTests
 
-FROM openjdk:17-ea-10-jdk-slim
+# Copia o código fonte para o container
+COPY pom.xml .
+COPY src ./src
+
+# Realiza o build do projeto, ignorando os testes
+RUN mvn clean package -DskipTests
+
+# Etapa de runtime
+FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build ./app/target/*.jar ./newsflow-0.0.1-SNAPSHOT.jar
-ENTRYPOINT java -jar newsflow-0.0.1-SNAPSHOT.jar
+
+# Copia o JAR gerado na etapa de build para o container final
+COPY --from=build /app/target/*.jar app.jar
+
+# Define o comando para iniciar o aplicativo
+CMD ["java", "-jar", "app.jar"]
