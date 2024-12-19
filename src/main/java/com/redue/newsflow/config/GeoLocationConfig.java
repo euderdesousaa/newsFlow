@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -24,11 +23,12 @@ public class GeoLocationConfig {
     public DatabaseReader getDatabaseReader() {
         try {
             log.info("GeoLocationConfig: Trying to load GeoLite2-Country database...");
-            File databaseFile = new File("src/main/resources/maxmind/GeoLite2-City.mmdb");
+            Resource resource = resourceLoader.getResource("classpath:maxmind/GeoLite2-City.mmdb");
+            InputStream inputStream = resource.getInputStream();
             log.info("GeoLocationConfig: GeoLite2-Country database successfully loaded.");
 
             return new DatabaseReader
-                    .Builder(databaseFile)
+                    .Builder(inputStream)
                     .fileMode(Reader.FileMode.MEMORY_MAPPED)
                     .build();
         } catch (IOException | NullPointerException e) {
@@ -36,5 +36,4 @@ public class GeoLocationConfig {
             return null;
         }
     }
-
 }
