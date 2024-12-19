@@ -1,8 +1,9 @@
-# Use a base image with Java
-FROM openjdk:17-alpine
+FROM maven:3.8.6-amazoncorretto-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package -X -DskipTests
 
-# Copy the built jar file into the image
-COPY target/*.jar app.jar
-
-# Set the entry point to run your application
-ENTRYPOINT ["java","-jar","/app.jar"]
+FROM openjdk:17-ea-10-jdk-slim
+WORKDIR /app
+COPY --from=build ./app/target/*.jar ./newsflow-0.0.1-SNAPSHOT.jar
+ENTRYPOINT java -jar newsflow-0.0.1-SNAPSHOT.jar
