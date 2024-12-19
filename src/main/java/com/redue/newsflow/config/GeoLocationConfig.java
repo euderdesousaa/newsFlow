@@ -24,7 +24,7 @@ public class GeoLocationConfig {
     public DatabaseReader getDatabaseReader() {
         try {
             log.info("GeoLocationConfig: Trying to load GeoLite2-Country database...");
-            File databaseFile = new File("/resources/maxmind/GeoLite2-City.mmdb");
+            File databaseFile = new File("src/main/resources/maxmind/GeoLite2-City.mmdb");
             log.info("GeoLocationConfig: GeoLite2-Country database successfully loaded.");
 
             return new DatabaseReader
