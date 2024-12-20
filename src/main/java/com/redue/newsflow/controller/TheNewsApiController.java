@@ -14,7 +14,6 @@ public class TheNewsApiController {
 
     private final TheNewsApiService service;
 
-
     @GetMapping
     public TheNewsApiData getTheNews(@RequestParam(defaultValue = "1") int page) {
         return service.findAllNews(page);

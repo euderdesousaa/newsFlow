@@ -27,7 +27,6 @@ public class GeoLocationConfig {
         try {
             log.info("GeoLocationConfig: Trying to load GeoLite2-City database...");
 
-            // Use FileSystemResource para acessar diretamente o arquivo no sistema
             FileSystemResource resource = new FileSystemResource("src/main/resources/maxmind/GeoLite2-City.mmdb");
 
             if (!resource.exists()) {
@@ -36,7 +35,6 @@ public class GeoLocationConfig {
 
             log.info("GeoLocationConfig: GeoLite2-City database successfully loaded.");
 
-            // Use FileMode.MEMORY_MAPPED com arquivos acessados diretamente
             return new DatabaseReader.Builder(resource.getFile())
                     .fileMode(Reader.FileMode.MEMORY_MAPPED)
                     .withCache(new CHMCache())
