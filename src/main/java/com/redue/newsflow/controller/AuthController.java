@@ -41,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<SignUpDto> registerUser(@Valid @RequestBody SignUpDto dto,
-                                                  HttpServletRequest request) throws IOException, GeoIp2Exception {
+                                                  HttpServletRequest request) {
         SignUpDto sign = service.registerUser(dto, request);
         return ResponseEntity.ok(sign);
     }

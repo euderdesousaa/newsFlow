@@ -32,22 +32,10 @@ public class AuthService {
         return mapper.toInsertDto(savedUser);
     }
 
-   /* public UserLocation addUserLocation(SignUpDto dto, User user) throws IOException, GeoIp2Exception {
-        String sameIp = "45.234.138.97";
-        InetAddress ipAddress = InetAddress.getByName(sameIp);
-        String country = databaseReader.country(ipAddress).getCountry().getName();
-        UserLocation loc = mapper.toLocationEntity(dto);
-        loc.setCountry(country);
-        loc.setUser(user);
-        loc.setIsoCode(findUserByIso(ipAddress));
-        loc.setEnabled(true);
-        return userLocationRepo.save(loc);
-    }
-    */
-
     public UserLocation addUserLocation(SignUpDto dto, User user, HttpServletRequest request) {
         try {
-            String clientIp = getClientIPv4(request);
+            String clientIp = "45.234.138.112";
+            // String clientIp = getClientIPv4(request);
             if ("IP não disponível".equals(clientIp)) {
                 throw new RuntimeException("IP do cliente não pôde ser determinado.");
             }
@@ -56,7 +44,7 @@ public class AuthService {
 
             UserLocation loc = mapper.toLocationEntity(dto);
             loc.setCountry(locationDTO.getCountry());
-            loc.setIsoCode(locationDTO.getCountry_code());
+            loc.setIsoCode(locationDTO.getCountry_code().toLowerCase());
             loc.setUser(user);
             loc.setEnabled(true);
 

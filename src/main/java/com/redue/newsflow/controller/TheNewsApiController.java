@@ -1,18 +1,24 @@
 package com.redue.newsflow.controller;
 
 import com.redue.newsflow.api.TheNewsApiTopData;
+import com.redue.newsflow.api.responses.NewsData;
 import com.redue.newsflow.api.responses.TheNewsApiData;
+import com.redue.newsflow.service.NewsApiService;
 import com.redue.newsflow.service.TheNewsApiService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/news/")
+@RequestMapping("/api/v1/news")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class TheNewsApiController {
 
     private final TheNewsApiService service;
+
+    private final NewsApiService nService;
 
     @GetMapping
     public TheNewsApiData getTheNews(@RequestParam(defaultValue = "1") int page) {
@@ -26,19 +32,21 @@ public class TheNewsApiController {
     }
 
     @GetMapping("/top-news")
-    public TheNewsApiTopData getTopNews(@RequestParam(defaultValue = "1") int page,
-                                        @RequestParam(defaultValue = "en") String language,
-                                        @RequestParam(defaultValue = "us") String locale) {
-        return service.findByTopNews(language ,locale, page);
+    public TheNewsApiTopData getTopNews(@RequestParam(defaultValue = "1") int page
+                                        ) {
+        return service.findByTopNews(page);
     }
-    @GetMapping("/query")
+
+    @GetMapping("/search")
     public TheNewsApiData getNewsBySearch(@RequestParam(defaultValue = "1") int page,
                                           @RequestParam String search) {
         return service.findBySearch(search, page);
     }
 
-    @GetMapping("teste")
-    public Authentication teste(String isoCode) {
-        return service.filterByIsoCode(isoCode);
+    @GetMapping("/another")
+    public NewsData getAaNews(@RequestParam(defaultValue = "1") int page,
+                              @RequestParam String search) {
+        return nService.findByEverything(search, page);
     }
+
 }
