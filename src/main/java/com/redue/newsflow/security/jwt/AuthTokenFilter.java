@@ -38,7 +38,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             }
         }
 
-        if(jwt == null){
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -57,8 +57,6 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             }
 
         }
-
-
         filterChain.doFilter(request, response);
     }
 }
