@@ -33,13 +33,27 @@ public class NewsApiService {
 
         if (newsData != null && newsData.getArticles() != null) {
             List<NewsApiData> filteredArticles = filterRemovedArticles(newsData.getArticles());
-            newsData.setArticles(filteredArticles); // Atualizar os artigos filtrados
+            newsData.setArticles(filteredArticles);
         }
 
         return newsData;
     }
 
+    public NewsData findAll( int page) {
+        String finalApi = buildAPI("everything", page, null, null)
+                .concat("&sort=").concat("popularity");
+        log.info("Fetching data from: " + finalApi);
 
+        NewsData newsData = fetchData(finalApi, NewsData.class);
+
+        if (newsData != null && newsData.getArticles() != null) {
+            List<NewsApiData> filteredArticles = filterRemovedArticles(newsData.getArticles());
+            newsData.setArticles(filteredArticles);
+        }
+
+        return newsData;
+    }
+    
     private String buildAPI(String endpoint, int page, String locale, String categories) {
         StringBuilder url = new StringBuilder(BASE_URL)
                 .append("/")
@@ -65,7 +79,7 @@ public class NewsApiService {
         return restTemplate.getForObject(url, responseType);
     }
 
-    public List<NewsApiData> filterRemovedArticles(List<NewsApiData> articles) {
+    private List<NewsApiData> filterRemovedArticles(List<NewsApiData> articles) {
         return articles.stream()
                 .filter(article -> !containsRemovedText(article))
                 .collect(Collectors.toList());
