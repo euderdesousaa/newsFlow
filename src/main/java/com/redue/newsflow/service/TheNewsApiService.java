@@ -36,6 +36,7 @@ public class TheNewsApiService {
     private static final String BASE_URL = "https://api.thenewsapi.com/v1/news";
 
     public TheNewsApiData findAllNews(int page) {
+        // TODO -> IMPLEMENTAR UMA VERIFICAÇÃO CASO O USUÁRIO QUER TODAS NOTICIAS GLOBAIS ANY LANGUAGE OU REGIONAL. 
         String finalApi = buildAPI("all", page, null, null, null);
         return fetchData(finalApi, TheNewsApiData.class);
     }
@@ -47,7 +48,7 @@ public class TheNewsApiService {
 
     public TheNewsApiTopData findByTopNews(int page) {
         String isoCode = getUserIsoCode();
-        String language = RegionLanguage.getLanguageForRegion(isoCode); // Obtenha o idioma a partir do isoCode
+        String language = RegionLanguage.getLanguageForRegion(isoCode);
         String finalApi = buildAPI("top", page, language, isoCode, null);
         return fetchData(finalApi, TheNewsApiTopData.class);
     }
