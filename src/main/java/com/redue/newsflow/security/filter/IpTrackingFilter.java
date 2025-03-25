@@ -8,11 +8,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@Component
 @WebFilter("/*")
 public class IpTrackingFilter implements Filter {
 
