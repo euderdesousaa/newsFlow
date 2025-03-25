@@ -31,13 +31,15 @@ public class IpTrackingFilter implements Filter {
             throws IOException, ServletException {
 
         HttpServletRequest httpRequest = (HttpServletRequest) request;
-        HttpSession session = httpRequest.getSession();
 
-        String ip = httpRequest.getRemoteAddr(); // Ou pegar do "X-Forwarded-For"
-        log.info("IP Capturado: " + ip);
-        sessionIpStore.saveIp(httpRequest.getRemoteAddr(), ip);
+        String ipAddress = httpRequest.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
 
-        accessLogService.saveAccessLog(session.getId(), ip, "Desconhecido"); // Pode integrar com API para pegar país
+        sessionIpStore.saveIp(httpRequest.getRemoteAddr(), ipAddress);
+
+        accessLogService.saveAccessLog(ipAddress, ipAddress, "Desconhecido"); // Pode integrar com API para pegar país
 
         chain.doFilter(request, response);
     }
