@@ -4,6 +4,7 @@ import com.redue.newsflow.dto.NewsArticle;
 import com.redue.newsflow.dto.NewsDTO;
 import com.redue.newsflow.service.CustomRssService;
 import com.redue.newsflow.service.ScrappingService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,5 +36,11 @@ public class TestController {
     @GetMapping("/g1")
     public List<NewsArticle> getG1News() {
         return customRssService.fetchG1News();
+    }
+    
+    @GetMapping("myip")
+    public String getMyIpNews(HttpServletRequest request) {
+        String ip = request.getRemoteAddr();
+        return "My IP: " + ip;
     }
 }
