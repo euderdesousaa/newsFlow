@@ -2,6 +2,7 @@ package com.redue.newsflow.security.filter;
 
 import com.redue.newsflow.component.SessionIpStore;
 import com.redue.newsflow.service.AccessLogService;
+import com.redue.newsflow.service.GeoLocationService;
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,6 +23,7 @@ public class IpTrackingFilter implements Filter {
 
     private final AccessLogService accessLogService;
     
+    
     private static final Logger log = Logger.getLogger(IpTrackingFilter.class.getName());
 
     @Override
@@ -33,8 +35,7 @@ public class IpTrackingFilter implements Filter {
 
         String ip = httpRequest.getRemoteAddr(); // Ou pegar do "X-Forwarded-For"
         log.info("IP Capturado: " + ip);
-        
-        sessionIpStore.saveIp(session.getId(), ip);
+        sessionIpStore.saveIp(httpRequest.getRemoteAddr(), ip);
 
         accessLogService.saveAccessLog(session.getId(), ip, "Desconhecido"); // Pode integrar com API para pegar país
 
