@@ -1,6 +1,5 @@
 package com.redue.newsflow.controller;
 
-import com.maxmind.geoip2.exception.GeoIp2Exception;
 import com.redue.newsflow.dto.LoginDto;
 import com.redue.newsflow.dto.LoginResponseDTO;
 import com.redue.newsflow.dto.SignUpDto;
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
@@ -42,7 +39,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<SignUpDto> registerUser(@Valid @RequestBody SignUpDto dto,
                                                   HttpServletRequest request) {
-        SignUpDto sign = service.registerUser(dto, request);
+        SignUpDto sign = service.registerUser(dto);
         return ResponseEntity.ok(sign);
     }
 
