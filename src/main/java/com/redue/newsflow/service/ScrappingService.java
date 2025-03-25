@@ -9,6 +9,7 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
+import lombok.extern.java.Log;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -18,10 +19,12 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
 public class ScrappingService {
+    private static final Logger log = Logger.getLogger(ScrappingService.class.getName());
 
     public List<NewsDTO> fetchLatestNews() {
         List<NewsDTO> newsList = new ArrayList<>();
@@ -41,7 +44,7 @@ public class ScrappingService {
                     ));
                 }
             } catch (Exception e) {
-                System.out.println("Failed to fetch: " + rssUrl);
+                log.info("Failed to fetch: " + rssUrl);
             }
         }
 
@@ -81,7 +84,7 @@ public class ScrappingService {
             Elements images = doc.select(site.getThumbnailSelector());
 
             int size = Math.min(titles.size(), Math.min(links.size(), images.size()));
-            System.out.println("Total de notícias encontradas para " + site.getSiteName() + ": " + size);
+            log.info("Total de notícias encontradas para " + site.getSiteName() + ": " + size);
 
             for (int i = 0; i < size; i++) {
                 String title = titles.get(i).text();
@@ -95,7 +98,7 @@ public class ScrappingService {
                 articles.add(new NewsArticle(title, link, image));
             }
         } catch (Exception e) {
-            System.err.println("Erro ao coletar notícias de " + site.getSiteName() + ": " + e.getMessage());
+            log.info("Erro ao coletar notícias de " + site.getSiteName() + ": " + e.getMessage());
         }
 
         return articles;
