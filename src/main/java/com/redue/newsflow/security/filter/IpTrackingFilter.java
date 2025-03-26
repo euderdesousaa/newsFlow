@@ -5,7 +5,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import net.minidev.json.JSONObject;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -61,9 +61,8 @@ public class IpTrackingFilter implements Filter {
             }
             in.close();
 
-            // Parse JSON e extrai o ISO Code do país
-            JSONObject json = new JSONObject(Integer.parseInt(response.toString()));
-            return json.getAsString("country"); // Exemplo: "BR" para Brasil
+            JSONObject json = new JSONObject(response.toString());
+            return json.getString("country");
 
         } catch (Exception e) {
             e.printStackTrace();
