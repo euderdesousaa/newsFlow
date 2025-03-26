@@ -5,7 +5,9 @@ import com.redue.newsflow.dto.NewsDTO;
 import com.redue.newsflow.service.CustomRssService;
 import com.redue.newsflow.service.ScrappingService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -37,11 +39,12 @@ public class TestController {
     public List<NewsArticle> getG1News() {
         return customRssService.fetchG1News();
     }
-    
-    @GetMapping("myip")
-    public String getMyIpNews(HttpServletRequest request) {
-        String ip = request.getRemoteAddr();
-        return "My IP: " + ip;
+
+    @GetMapping("/get-country")
+    public ResponseEntity<String> getUserCountry(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        String userCountry = (String) session.getAttribute("userCountry");
+        return ResponseEntity.ok(userCountry);
     }
 
     @GetMapping("/user/ip")
