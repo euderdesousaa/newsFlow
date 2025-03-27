@@ -19,9 +19,7 @@ import java.net.URL;
 @Component
 @WebFilter("/*")
 public class IpTrackingFilter implements Filter {
-
-
-
+    
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
@@ -32,13 +30,14 @@ public class IpTrackingFilter implements Filter {
         String ipAddress = httpRequest.getHeader("X-Forwarded-For");
         if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
             ipAddress = request.getRemoteAddr();
+            System.out.println(ipAddress);
         }
 
         // Verifica se já temos o ISO Code salvo na sessão
         String isoCode = (String) session.getAttribute("userCountry");
         if (isoCode == null) {
-            isoCode = getCountryIsoCode(ipAddress); // Busca o ISO Code pela API
-            session.setAttribute("userCountry", isoCode); // Salva apenas o ISO Code
+            isoCode = getCountryIsoCode(ipAddress); 
+            session.setAttribute("userCountry", isoCode);
         }
 
         chain.doFilter(request, response);
@@ -46,7 +45,9 @@ public class IpTrackingFilter implements Filter {
 
     private String getCountryIsoCode(String ip) {
         try {
-            String apiUrl = "https://ipinfo.io/" + ip + "/json";
+            String apiUrl = "https://ipinfo.io/" + "45.234.138.189" + "/json";
+            //US: 65.29.148.75
+            //BR: 45.234.138.189
             URL url = new URL(apiUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
@@ -66,7 +67,7 @@ public class IpTrackingFilter implements Filter {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return "Desconhecido";
+            return "Unknown";
         }
     }
 }
