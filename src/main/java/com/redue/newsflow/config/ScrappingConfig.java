@@ -1,10 +1,15 @@
 package com.redue.newsflow.config;
 
 import com.redue.newsflow.dto.SiteConfig;
+import com.redue.newsflow.enums.SpainCountries;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Locale;
 
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ScrappingConfig {
     public static final int MAX_NEWS_PER_SITE = 10;
 
@@ -23,9 +28,16 @@ public class ScrappingConfig {
             "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada", // Spain
             "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/america/portada", // America Latina
             "https://www.clarin.com/rss/lo-ultimo/", //America Latina(AR)
-            "https://feeds.bbci.co.uk/sport/rss.xml" //
+            "https://www.eltiempo.com/rss/colombia.xml", //America Latina(Colombia)
+            "https://www.eltiempo.com/rss/mundo_latinoamerica.xml" // America Latina(All)
     );
 
+    public static final List<String> SPANISH_SPORT_RSS_FEEDS = List.of(
+            "https://e00-elmundo.uecdn.es/elmundodeporte/rss/portada.xml",
+            "https://www.eltiempo.com/rss/deportes.xml",
+            "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/deportes/portada",
+            "https://www.clarin.com/rss/deportes/"
+    );
 
 
     // Cached configurations
@@ -59,11 +71,19 @@ public class ScrappingConfig {
             return getBrazilianSites(category);
         }
 
-        return INTERNATIONAL_RSS_FEEDS; // Default fallback to RSS
+        if (isSpanishSource(isoCode)) {
+            return getSpanishRssFeeds(category);
+        }
+
+        return INTERNATIONAL_RSS_FEEDS;
     }
 
     private static boolean isInternationalSource(String isoCode) {
         return isUnknownCountry(isoCode) || "US".equalsIgnoreCase(isoCode);
+    }
+
+    private static boolean isSpanishSource(String isoCode) {
+        return SpainCountries.isSpanishSpeaking(isoCode);
     }
 
     private static boolean isUnknownCountry(String isoCode) {
@@ -76,9 +96,20 @@ public class ScrappingConfig {
         }
 
         return switch (category.toLowerCase(Locale.ROOT)) {
-            case "esportes" -> BR_SPORTS_SITES;
+            case "sports" -> BR_SPORTS_SITES;
             case "ultimas-noticias" -> BR_NEWS_SITES;
             default -> DEFAULT_BR_SITES;
+        };
+    }
+
+    private static List<String> getSpanishRssFeeds(String category) {
+        if (category == null) {
+            return SPANISH_RSS_FEEDS;
+        }
+        //Tem mais categorias para adicionar aqui...
+        return switch (category.toLowerCase(Locale.ROOT)) {
+            case "sports" -> SPANISH_SPORT_RSS_FEEDS;
+            default -> SPANISH_RSS_FEEDS;
         };
     }
 }
