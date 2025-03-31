@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 @Service
 public class ScrappingService {
     private static final Logger log = Logger.getLogger(ScrappingService.class.getName());
-    
+
     public List<NewsDTO> fetchLatestNews() {
         List<NewsDTO> newsList = new ArrayList<>();
 
@@ -102,7 +102,10 @@ public class ScrappingService {
         try {
             SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(feedUrl)));
             return feed.getEntries().stream()
-                    .map(entry -> new NewsArticle(entry.getTitle(), entry.getLink(), ""))
+                    .map(entry -> {
+                        String thumbnail = ThumbnailExtractor.extractThumbnail(entry);
+                        return new NewsArticle(entry.getTitle(), entry.getLink(), thumbnail);
+                    })
                     .toList();
         } catch (Exception e) {
             return Collections.emptyList();
