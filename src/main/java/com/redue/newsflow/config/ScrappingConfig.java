@@ -1,6 +1,7 @@
 package com.redue.newsflow.config;
 
 import com.redue.newsflow.dto.SiteConfig;
+import com.redue.newsflow.enums.FranceCountries;
 import com.redue.newsflow.enums.SpainCountries;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import java.util.Locale;
 public class ScrappingConfig {
     public static final int MAX_NEWS_PER_SITE = 10;
 
-    public static final List<String> INTERNATIONAL_RSS_FEEDS = List.of(
+    public static final List<String> ENGLISH_RSS_FEED = List.of(
             "https://feeds.bbci.co.uk/news/rss.xml",
             "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
             "https://edition.cnn.com/services/rss/",
@@ -37,6 +38,20 @@ public class ScrappingConfig {
             "https://www.eltiempo.com/rss/deportes.xml",
             "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/deportes/portada",
             "https://www.clarin.com/rss/deportes/"
+    );
+
+    public static final List<String> FRANCE_RSS_FEEDS = List.of(
+            "https://www.lefigaro.fr/rss/figaro_actualites.xml",
+            "https://www.lefigaro.fr/rss/figaro_flash-actu.xml", // Alterar daqui isso irá para as "Ultímas noticías".
+            "https://www.liberation.fr/arc/outboundfeeds/rss-all/collection/accueil-une/?outputType=xml",
+            "https://www.liberation.fr/arc/outboundfeeds/rss-all/category/international/?outputType=xml",
+            "https://www.lemonde.fr/rss/une.xml",
+            "https://www.lemonde.fr/international/rss_full.xml"
+    );
+    public static final List<String> FRANCE_SPORT_RSS_FEEDS = List.of(
+            "https://www.liberation.fr/arc/outboundfeeds/rss-all/category/sports/?outputType=xml",
+            "https://www.lefigaro.fr/rss/figaro_sport.xml",
+            "https://www.lemonde.fr/sport/rss_full.xml"
     );
 
 
@@ -64,18 +79,22 @@ public class ScrappingConfig {
 
     public static Object getNewsSources(String category, String isoCode) {
         if (isInternationalSource(isoCode)) {
-            return INTERNATIONAL_RSS_FEEDS;
+            return ENGLISH_RSS_FEED;
         }
 
         if ("BR".equalsIgnoreCase(isoCode)) {
             return getBrazilianSites(category);
         }
 
+        if (isFranceSource(isoCode)) {
+            return getFranceRssFeeds(category);
+        }
+
         if (isSpanishSource(isoCode)) {
             return getSpanishRssFeeds(category);
         }
 
-        return INTERNATIONAL_RSS_FEEDS;
+        return ENGLISH_RSS_FEED;
     }
 
     private static boolean isInternationalSource(String isoCode) {
@@ -85,6 +104,11 @@ public class ScrappingConfig {
     private static boolean isSpanishSource(String isoCode) {
         return SpainCountries.isSpanishSpeaking(isoCode);
     }
+
+    private static boolean isFranceSource(String isoCode) {
+        return FranceCountries.isSpanishSpeaking(isoCode);
+    }
+
 
     private static boolean isUnknownCountry(String isoCode) {
         return isoCode == null || "Desconhecido".equalsIgnoreCase(isoCode);
@@ -112,4 +136,16 @@ public class ScrappingConfig {
             default -> SPANISH_RSS_FEEDS;
         };
     }
+
+    private static List<String> getFranceRssFeeds(String category) {
+        if (category == null) {
+            return FRANCE_RSS_FEEDS;
+        }
+        //Tem mais categorias para adicionar aqui...
+        return switch (category.toLowerCase(Locale.ROOT)) {
+            case "sports" -> FRANCE_SPORT_RSS_FEEDS;
+            default -> FRANCE_RSS_FEEDS;
+        };
+    }
+
 }
