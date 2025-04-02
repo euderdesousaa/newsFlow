@@ -1,11 +1,20 @@
 package com.redue.newsflow.config;
 
 import com.redue.newsflow.dto.SiteConfig;
+import com.redue.newsflow.enums.FranceCountries;
+import com.redue.newsflow.enums.SpainCountries;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Locale;
 
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ScrappingConfig {
-    public static final List<String> RSS_FEEDS = List.of(
+    public static final int MAX_NEWS_PER_SITE = 10;
+
+    public static final List<String> ENGLISH_RSS_FEED = List.of(
             "https://feeds.bbci.co.uk/news/rss.xml",
             "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
             "https://edition.cnn.com/services/rss/",
@@ -14,29 +23,129 @@ public class ScrappingConfig {
             "https://feeds.bbci.co.uk/sport/rss.xml"
     );
 
-    public static final int MAX_NEWS_PER_SITE = 10;
+    public static final List<String> SPANISH_RSS_FEEDS = List.of(
+            "https://www.eldiario.es/rss", // Spain 
+            "https://e00-elmundo.uecdn.es/elmundo/rss/portada.xml", //Spain
+            "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada", // Spain
+            "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/america/portada", // America Latina
+            "https://www.clarin.com/rss/lo-ultimo/", //America Latina(AR)
+            "https://www.eltiempo.com/rss/colombia.xml", //America Latina(Colombia)
+            "https://www.eltiempo.com/rss/mundo_latinoamerica.xml" // America Latina(All)
+    );
 
-    public static List<SiteConfig> getSitesByCategory(String category) {
-        if ("esportes".equalsIgnoreCase(category)) {
-            return List.of(
-                    new SiteConfig("Metropole", "https://www.metropoles.com/esportes", ".noticia__titulo a", ".noticia__titulo a", ".bloco-noticia__figure-imagem"),
-                    new SiteConfig("R7", "https://esportes.r7.com", "h3 a span", "h3 a", "figure a img"),
-                    new SiteConfig("G1", "https://ge.globo.com", ".feed-post-body-title a", ".feed-post-body-title a", ".bstn-fd-picture-image"),
-                    new SiteConfig("CNN-Brasil", "https://www.cnnbrasil.com.br/esportes/", "h3.block__news__title", "a.block--manchetes__image__encapsulator", "img.block--manchetes__image")
-            );
-        } else if ("ultimas-noticias".equalsIgnoreCase(category)) {
-            return List.of(
-                    new SiteConfig("Metropole", "https://www.metropoles.com/ultimas-noticias", ".noticia__titulo a", ".noticia__titulo a", ".bloco-noticia__figure-imagem"),
-                    new SiteConfig("G1", "https://g1.globo.com/ultimas-noticias/", ".feed-post-body-title a", ".feed-post-body-title a", ".bstn-fd-picture-image"),
-                    new SiteConfig("CNN-Brasil", "https://www.cnnbrasil.com.br/ultimas-noticias/", "h3.block__news__title", "a.block--manchetes__image__encapsulator", "img.block--manchetes__image")
-            );
-        } else {
-            return List.of(
-                    new SiteConfig("Metropole", "https://www.metropoles.com", ".noticia__titulo a", ".noticia__titulo a", ".bloco-noticia__figure-imagem"),
-                    new SiteConfig("R7", "https://www.r7.com", "h3 a span", "h3 a", "figure a img"),
-                    new SiteConfig("G1", "https://g1.globo.com", ".feed-post-body-title a", ".feed-post-body-title a", ".bstn-fd-picture-image"),
-                    new SiteConfig("CNN-Brasil", "https://www.cnnbrasil.com.br", "h3.block__news__title", "a.block--manchetes__image__encapsulator", "img.block--manchetes__image")
-            );
+    public static final List<String> SPANISH_SPORT_RSS_FEEDS = List.of(
+            "https://e00-elmundo.uecdn.es/elmundodeporte/rss/portada.xml",
+            "https://www.eltiempo.com/rss/deportes.xml",
+            "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/section/deportes/portada",
+            "https://www.clarin.com/rss/deportes/"
+    );
+
+    public static final List<String> FRANCE_RSS_FEEDS = List.of(
+            "https://www.lefigaro.fr/rss/figaro_actualites.xml",
+            "https://www.lefigaro.fr/rss/figaro_flash-actu.xml", // Alterar daqui isso irá para as "Ultímas noticías".
+            "https://www.liberation.fr/arc/outboundfeeds/rss-all/collection/accueil-une/?outputType=xml",
+            "https://www.liberation.fr/arc/outboundfeeds/rss-all/category/international/?outputType=xml",
+            "https://www.lemonde.fr/rss/une.xml",
+            "https://www.lemonde.fr/international/rss_full.xml"
+    );
+    public static final List<String> FRANCE_SPORT_RSS_FEEDS = List.of(
+            "https://www.liberation.fr/arc/outboundfeeds/rss-all/category/sports/?outputType=xml",
+            "https://www.lefigaro.fr/rss/figaro_sport.xml",
+            "https://www.lemonde.fr/sport/rss_full.xml"
+    );
+
+
+    // Cached configurations
+    private static final List<SiteConfig> DEFAULT_BR_SITES = List.of(
+            new SiteConfig("Metropole", "https://www.metropoles.com", ".noticia__titulo a", ".noticia__titulo a", ".bloco-noticia__figure-imagem"),
+            new SiteConfig("R7", "https://www.r7.com", "h3 a span", "h3 a", "figure a img"),
+            new SiteConfig("G1", "https://g1.globo.com", ".feed-post-body-title a", ".feed-post-body-title a", ".bstn-fd-picture-image"),
+            new SiteConfig("CNN-Brasil", "https://www.cnnbrasil.com.br", "h3.block__news__title", "a.block--manchetes__image__encapsulator", "img.block--manchetes__image")
+    );
+
+    private static final List<SiteConfig> BR_SPORTS_SITES = List.of(
+            new SiteConfig("Metropole", "https://www.metropoles.com/esportes", ".noticia__titulo a", ".noticia__titulo a", ".bloco-noticia__figure-imagem"),
+            new SiteConfig("R7", "https://esportes.r7.com", "h3 a span", "h3 a", "figure a img"),
+            new SiteConfig("G1", "https://ge.globo.com", ".feed-post-body-title a", ".feed-post-body-title a", ".bstn-fd-picture-image"),
+            new SiteConfig("CNN-Brasil", "https://www.cnnbrasil.com.br/esportes/", "h3.block__news__title", "a.block--manchetes__image__encapsulator", "img.block--manchetes__image")
+    );
+
+    private static final List<SiteConfig> BR_NEWS_SITES = List.of(
+            new SiteConfig("Metropole", "https://www.metropoles.com/ultimas-noticias", ".noticia__titulo a", ".noticia__titulo a", ".bloco-noticia__figure-imagem"),
+            new SiteConfig("G1", "https://g1.globo.com/ultimas-noticias/", ".feed-post-body-title a", ".feed-post-body-title a", ".bstn-fd-picture-image"),
+            new SiteConfig("CNN-Brasil", "https://www.cnnbrasil.com.br/ultimas-noticias/", "h3.block__news__title", "a.block--manchetes__image__encapsulator", "img.block--manchetes__image")
+    );
+
+
+    public static Object getNewsSources(String category, String isoCode) {
+        if (isInternationalSource(isoCode)) {
+            return ENGLISH_RSS_FEED;
         }
+
+        if ("BR".equalsIgnoreCase(isoCode)) {
+            return getBrazilianSites(category);
+        }
+
+        if (isFranceSource(isoCode)) {
+            return getFranceRssFeeds(category);
+        }
+
+        if (isSpanishSource(isoCode)) {
+            return getSpanishRssFeeds(category);
+        }
+
+        return ENGLISH_RSS_FEED;
     }
+
+    private static boolean isInternationalSource(String isoCode) {
+        return isUnknownCountry(isoCode) || "US".equalsIgnoreCase(isoCode);
+    }
+
+    private static boolean isSpanishSource(String isoCode) {
+        return SpainCountries.isSpanishSpeaking(isoCode);
+    }
+
+    private static boolean isFranceSource(String isoCode) {
+        return FranceCountries.isSpanishSpeaking(isoCode);
+    }
+
+
+    private static boolean isUnknownCountry(String isoCode) {
+        return isoCode == null || "Desconhecido".equalsIgnoreCase(isoCode);
+    }
+
+    private static List<SiteConfig> getBrazilianSites(String category) {
+        if (category == null) {
+            return DEFAULT_BR_SITES;
+        }
+
+        return switch (category.toLowerCase(Locale.ROOT)) {
+            case "sports" -> BR_SPORTS_SITES;
+            case "ultimas-noticias" -> BR_NEWS_SITES;
+            default -> DEFAULT_BR_SITES;
+        };
+    }
+
+    private static List<String> getSpanishRssFeeds(String category) {
+        if (category == null) {
+            return SPANISH_RSS_FEEDS;
+        }
+        //Tem mais categorias para adicionar aqui...
+        return switch (category.toLowerCase(Locale.ROOT)) {
+            case "sports" -> SPANISH_SPORT_RSS_FEEDS;
+            default -> SPANISH_RSS_FEEDS;
+        };
+    }
+
+    private static List<String> getFranceRssFeeds(String category) {
+        if (category == null) {
+            return FRANCE_RSS_FEEDS;
+        }
+        //Tem mais categorias para adicionar aqui...
+        return switch (category.toLowerCase(Locale.ROOT)) {
+            case "sports" -> FRANCE_SPORT_RSS_FEEDS;
+            default -> FRANCE_RSS_FEEDS;
+        };
+    }
+
 }
