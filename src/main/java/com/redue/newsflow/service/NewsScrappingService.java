@@ -26,13 +26,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
-public class ScrappingService {
-    private static final Logger log = Logger.getLogger(ScrappingService.class.getName());
-
+public class NewsScrappingService {
+    private static final Logger log = Logger.getLogger(NewsScrappingService.class.getName());
+    
     public List<NewsDTO> fetchLatestNews() {
         List<NewsDTO> newsList = new ArrayList<>();
 
-        for (String rssUrl : ScrappingConfig.INTERNATIONAL_RSS_FEEDS) {
+        for (String rssUrl : ScrappingConfig.ENGLISH_RSS_FEED) {
             try {
                 URL url = new URL(rssUrl);
                 SyndFeed feed = new SyndFeedInput().build(new XmlReader(url));
@@ -101,10 +101,11 @@ public class ScrappingService {
     private List<NewsArticle> parseRssFeed(String feedUrl) {
         try {
             SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(feedUrl)));
+            String source = TitleTrimService.cleanTitle(feed.getTitle());
             return feed.getEntries().stream()
                     .map(entry -> {
                         String thumbnail = ThumbnailExtractor.extractThumbnail(entry);
-                        return new NewsArticle(entry.getTitle(), entry.getLink(), thumbnail);
+                        return new NewsArticle(entry.getTitle(), entry.getLink(), thumbnail, source);
                     })
                     .toList();
         } catch (Exception e) {
@@ -127,12 +128,13 @@ public class ScrappingService {
                 String title = titles.get(i).text();
                 String link = links.get(i).attr("href");
                 String image = images.get(i).attr("src");
+                String source = site.getSiteName();
 
                 if (!link.startsWith("http")) {
                     link = site.getUrl() + link;
                 }
 
-                articles.add(new NewsArticle(title, link, image));
+                articles.add(new NewsArticle(title, link, image, source));
             }
         } catch (IOException e) {
             log.throwing("Erro ao conectar no site {}: {}", site.getSiteName(), e);
