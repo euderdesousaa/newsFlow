@@ -82,37 +82,35 @@ public class FootballScrappingService {
         return standings;
     }
 
-    public List<FootballTeamStanding> scrapeLaLiga() {
+    public List<FootballTeamStanding> scrapeLaLiga() throws IOException {
         String url = "https://www.bbc.com/sport/football/spanish-la-liga/table";
         List<FootballTeamStanding> standings = new ArrayList<>();
+        Document doc = Jsoup.connect(url).get();
+        Elements rows = doc.select("tr");
 
-        try {
-            Document doc = Jsoup.connect(url)
-                    .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-                    .get();
-            
-            Elements rows = doc.select("table tbody tr");
+        for (Element row : rows) {
+            Elements cells = row.select("td.ssrcss-3tr7ea-TableCell.e1rbusmt1");
+            if (cells.size() < 9) continue;
 
-            for (Element row : rows) {
-                try {
-                    String positionText = row.select(".ssrcss-owwpxq-Rank").text().trim();
-                    int position = positionText.isEmpty() ? 0 : Integer.parseInt(positionText);
+            String positionText = cells.get(0).select("span.ssrcss-owwpxq-Rank.eod5afi2").text();
+            if (positionText.isEmpty()) continue;
+            int position = Integer.parseInt(positionText);
 
-                    String team = row.select(".ssrcss-136gngg-TeamNameLink").text().trim();
-                    int played = parseInteger(row.select("td:nth-of-type(2)").text());
-                    int won = parseInteger(row.select("td:nth-of-type(3)").text());
-                    int drawn = parseInteger(row.select("td:nth-of-type(4)").text());
-                    int lost = parseInteger(row.select("td:nth-of-type(5)").text());
-                    int goalDifference = parseInteger(row.select("td:nth-of-type(8)").text());
-                    int points = parseInteger(row.select(".ssrcss-4tj2rv-Points").text());
-
-                    standings.add(new FootballTeamStanding(team, position, played, won, drawn, lost, goalDifference, points));
-                } catch (NumberFormatException e) {
-                    System.err.println("Erro ao converter um número: " + e.getMessage());
-                }
+            // Nome do Time
+            String teamName = cells.get(0).select("span.ssrcss-tm9jcp-Element.e8ewd9q0").text();
+            if (teamName.isEmpty()) {
+                teamName = cells.get(0).select("span.visually-hidden.ssrcss-1f39n02-VisuallyHidden.e16en2lz0").text();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            if (teamName.isEmpty()) continue;
+
+            int played = Integer.parseInt(cells.get(1).text());
+            int won = Integer.parseInt(cells.get(2).text());
+            int drawn = Integer.parseInt(cells.get(3).text());
+            int lost = Integer.parseInt(cells.get(4).text());
+            int goalDifference = Integer.parseInt(cells.get(7).text());
+            int points = Integer.parseInt(cells.get(8).select("span.ssrcss-4tj2rv-Points.e1rbusmt0").text());
+
+            standings.add(new FootballTeamStanding(teamName, position, played, won, drawn, lost, goalDifference, points));
         }
 
         return standings;

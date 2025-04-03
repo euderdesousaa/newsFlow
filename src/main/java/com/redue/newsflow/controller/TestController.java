@@ -80,7 +80,7 @@ public class TestController {
     }
 
     @GetMapping("/laliga")
-    public List<FootballTeamStanding> getLaligaData() {
+    public List<FootballTeamStanding> getLaligaData() throws IOException {
         return footballScrappingService.scrapeLaLiga();
     }
 
