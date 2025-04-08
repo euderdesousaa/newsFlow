@@ -18,10 +18,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -60,10 +57,10 @@ public class NewsScrappingService {
                 .collect(Collectors.toList());
     }
 
-    public List<NewsArticle> scrapeAllNews(String siteName, String category, String isoCode) {
+    public List<NewsArticle> scrapeAllNews(String siteName, String category, Map<String, String> userLocation) {
         List<NewsArticle> allNews = new ArrayList<>();
 
-        Object newsSources = ScrappingConfig.getNewsSources(category, isoCode);
+        Object newsSources = ScrappingConfig.getNewsSources(category, userLocation.toString());
 
         if (newsSources instanceof List<?>) {
             List<?> sources = (List<?>) newsSources;
