@@ -57,10 +57,10 @@ public class NewsScrappingService {
                 .collect(Collectors.toList());
     }
 
-    public List<NewsArticle> scrapeAllNews(String siteName, String category, Map<String, String> userLocation) {
+    public List<NewsArticle> scrapeAllNews(String siteName, String category, String userLocation) {
         List<NewsArticle> allNews = new ArrayList<>();
 
-        Object newsSources = ScrappingConfig.getNewsSources(category, userLocation.toString());
+        Object newsSources = ScrappingConfig.getNewsSources(category, userLocation);
 
         if (newsSources instanceof List<?>) {
             List<?> sources = (List<?>) newsSources;
@@ -101,14 +101,16 @@ public class NewsScrappingService {
             String source = TitleTrimService.cleanTitle(feed.getTitle());
             return feed.getEntries().stream()
                     .map(entry -> {
+                        String description = entry.getDescription() != null ? entry.getDescription().getValue() : "";
                         String thumbnail = ThumbnailExtractor.extractThumbnail(entry);
-                        return new NewsArticle(entry.getTitle(), entry.getLink(), thumbnail, source);
+                        return new NewsArticle(entry.getTitle(), entry.getLink(), thumbnail, source, description);
                     })
                     .toList();
         } catch (Exception e) {
             return Collections.emptyList();
         }
     }
+
 
     private List<NewsArticle> scrapeNews(SiteConfig site) {
         List<NewsArticle> articles = new ArrayList<>();
