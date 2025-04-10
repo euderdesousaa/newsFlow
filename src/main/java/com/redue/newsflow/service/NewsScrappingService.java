@@ -10,6 +10,7 @@ import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.FeedException;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
+import lombok.RequiredArgsConstructor;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
@@ -23,9 +24,12 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class NewsScrappingService {
     private static final Logger log = Logger.getLogger(NewsScrappingService.class.getName());
-    
+
+    private final CohereService cohereService;
+    private static final int MAX_TEXT_LENGTH = 50000;
     public List<NewsDTO> fetchLatestNews() {
         List<NewsDTO> newsList = new ArrayList<>();
 
@@ -47,6 +51,7 @@ public class NewsScrappingService {
             } catch (MalformedURLException e) {
                 log.warning("URL inválida: " + rssUrl);
             } catch (FeedException | IOException e) {
+                log.warning("Erro ao processar feed: " + e.getMessage());
             }
         }
 
@@ -95,6 +100,35 @@ public class NewsScrappingService {
         return allNews;
     }
 
+    public String generateSummaryFromScraping(String siteName, String category, String userLocation) {
+        List<NewsArticle> newsArticles = scrapeAllNews(siteName, category, userLocation);
+        StringBuilder combinedText = new StringBuilder();
+        String idioma = getIdiomaByLocation(userLocation);
+
+        for (NewsArticle article : newsArticles) {
+            String titleLine = "Title: " + article.getTitle() + "\n";
+            String descriptionLine = (article.getDescription() != null && !article.getDescription().isEmpty())
+                    ? "Description: " + article.getDescription() + "\n"
+                    : "";
+
+            if (combinedText.length() + titleLine.length() + descriptionLine.length() + 1 > MAX_TEXT_LENGTH) {
+                log.info("Limite de texto atingido, truncando em " + combinedText.length() + " caracteres.");
+                break;
+            }
+
+            combinedText.append(titleLine);
+            combinedText.append(descriptionLine);
+            combinedText.append("\n");
+        }
+
+        if (combinedText.length() == 0) {
+            return "No news available to summarize.";
+        }
+
+        log.info("Gerando resumo no idioma: " + idioma + " para localização: " + userLocation + " com " + combinedText.length() + " caracteres.");
+        return cohereService.resumirTexto(combinedText.toString(), idioma);
+    }
+
     private List<NewsArticle> parseRssFeed(String feedUrl) {
         try {
             SyndFeed feed = new SyndFeedInput().build(new XmlReader(new URL(feedUrl)));
@@ -107,10 +141,10 @@ public class NewsScrappingService {
                     })
                     .toList();
         } catch (Exception e) {
+            log.warning("Erro ao processar RSS feed: " + e.getMessage());
             return Collections.emptyList();
         }
     }
-
 
     private List<NewsArticle> scrapeNews(SiteConfig site) {
         List<NewsArticle> articles = new ArrayList<>();
@@ -133,14 +167,42 @@ public class NewsScrappingService {
                     link = site.getUrl() + link;
                 }
 
-                articles.add(new NewsArticle(title, link, image, source));
+                String content = scrapeArticleContent(link);
+                articles.add(new NewsArticle(title, link, image, source, content));
             }
         } catch (IOException e) {
-            log.throwing("Erro ao conectar no site {}: {}", site.getSiteName(), e);
+            log.warning("Erro ao conectar no site " + site.getSiteName() + ": " + e.getMessage());
         } catch (Exception e) {
-            log.throwing("Erro inesperado ao coletar notícias de {}: {}", site.getSiteName(), e);
+            log.warning("Erro inesperado ao coletar notícias de " + site.getSiteName() + ": " + e.getMessage());
         }
 
         return articles;
+    }
+
+    private String scrapeArticleContent(String url) {
+        try {
+            Document doc = Jsoup.connect(url).get();
+            Elements paragraphs = doc.select("p");
+            return paragraphs.text();
+        } catch (IOException e) {
+            log.warning("Erro ao extrair conteúdo de " + url + ": " + e.getMessage());
+            return "";
+        }
+    }
+
+    private String getIdiomaByLocation(String isoCode) {
+        if (isoCode == null) {
+            log.warning("isoCode está null, usando idioma padrão 'english'");
+            return "english";
+        } else if ("BR".equalsIgnoreCase(isoCode)) {
+            return "português";
+        } else if (ScrappingConfig.isFranceSource(isoCode)) {
+            return "français";
+        } else if (ScrappingConfig.isSpanishSource(isoCode)) {
+            return "español";
+        } else {
+            log.info("Localização desconhecida: " + isoCode + ", usando 'english'");
+            return "english";
+        }
     }
 }
