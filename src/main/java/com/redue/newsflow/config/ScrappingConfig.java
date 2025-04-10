@@ -97,15 +97,15 @@ public class ScrappingConfig {
         return ENGLISH_RSS_FEED;
     }
 
-    private static boolean isInternationalSource(String isoCode) {
+    public static boolean isInternationalSource(String isoCode) {
         return isUnknownCountry(isoCode) || "US".equalsIgnoreCase(isoCode);
     }
 
-    private static boolean isSpanishSource(String isoCode) {
+    public static boolean isSpanishSource(String isoCode) {
         return SpainCountries.isSpanishSpeaking(isoCode);
     }
 
-    private static boolean isFranceSource(String isoCode) {
+    public static boolean isFranceSource(String isoCode) {
         return FranceCountries.isSpanishSpeaking(isoCode);
     }
 
