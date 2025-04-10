@@ -12,4 +12,5 @@ public class NewsArticle {
     private String link;
     private String thumbnail;
     private String source;
+    private String description;
 }
