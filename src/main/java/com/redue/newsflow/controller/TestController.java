@@ -36,23 +36,23 @@ public class TestController {
     
     private final WeatherApiService weatherApiService;
 
-
-    @GetMapping
-    public List<NewsDTO> fetchLastNews() {
-        return scrappingService.fetchLatestNews();
-    }
-
     @GetMapping("/all")
     public List<NewsArticle> getAllNews(@RequestParam(required = false) String source,
                                         @RequestParam(required = false) String category, HttpServletRequest request) {
-        Map<String, String> sessionData = extractSession(request);
-        return scrappingService.scrapeAllNews(source, category, sessionData);
+        HttpSession session = request.getSession();
+        String userCountry = (String) session.getAttribute("userCountry");
+        return scrappingService.scrapeAllNews(source, category, userCountry);
     }
     
     @GetMapping("/weather")
-    public WeatherApiResponse getWeather(HttpServletRequest request) {
+    public ResponseEntity<WeatherApiResponse> getWeather(HttpServletRequest request) {
         String ipAddress = request.getHeader("X-Forwarded-For");
-       return weatherApiService.getCurrentWeather(ipAddress);
+        HttpSession session = request.getSession();
+        String userCity = (String) session.getAttribute("userCity");
+        String userRegion = (String) session.getAttribute("userRegion");
+        WeatherApiResponse response = weatherApiService.getCurrentWeather(ipAddress);
+        response.setCityName(userCity + " " + userRegion);
+       return ResponseEntity.ok().body(response);
     }
 
     //Pensando se mantenho.
