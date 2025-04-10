@@ -37,32 +37,36 @@ public class IpTrackingFilter implements Filter {
 
         String isoCode = (String) session.getAttribute("userCountry");
         String city = (String) session.getAttribute("userCity");
+        String region = (String) session.getAttribute("userRegion");
 
-        if (isoCode == null || city == null) {
+        if (isoCode == null || city == null || region == null) {
             Map<String, String> locationData = getLocationData(ipAddress);
             isoCode = locationData.get("country");
             city = locationData.get("city");
+            region = locationData.get("region");
 
             session.setAttribute("userCountry", isoCode);
             session.setAttribute("userCity", city);
+            session.setAttribute("userRegion", region);
         }
 
         chain.doFilter(request, response);
     }
-
     private Map<String, String> getLocationData(String ip) {
         Map<String, String> location = new HashMap<>();
         try {
             String apiUrl = "https://ipinfo.io/" + ip + "/json";
-            
+
             JSONObject json = getJsonObject(apiUrl);
             location.put("city", json.getString("city"));
             location.put("country", json.getString("country"));
+            location.put("region", json.getString("region"));
 
         } catch (Exception e) {
             e.printStackTrace();
             location.put("city", "Unknown");
             location.put("country", "Unknown");
+            location.put("region", "Unknown");
         }
         return location;
     }
@@ -82,7 +86,6 @@ public class IpTrackingFilter implements Filter {
         }
         in.close();
 
-        JSONObject json = new JSONObject(response.toString());
-        return json;
+        return new JSONObject(response.toString());
     }
 }
